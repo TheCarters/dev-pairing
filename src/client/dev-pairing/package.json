@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:production": "npm run build && xcopy dist\\dev-pairing\\browser ..\\..\\server\\DevPairing.Api\\wwwroot /E /I /Y",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

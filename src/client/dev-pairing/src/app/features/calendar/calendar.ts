@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventClickArg, DateSelectArg } from '@fullcalendar/core';
@@ -16,7 +16,8 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FullCalendarModule, FormsModule],
   templateUrl: './calendar.html',
-  styleUrls: ['./calendar.css']
+  styleUrls: ['./calendar.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CalendarComponent {
   slotsStore = inject(SlotsStore);
@@ -24,10 +25,12 @@ export class CalendarComponent {
   userStore = inject(UserStore);
   router = inject(Router);
 
-  showCreateModal = false;
-  newSlotTitle = '';
-  newSlotStart = '';
-  newSlotEnd = '';
+  showCreateModal = signal(false);
+  newSlotTitle = signal('');
+  newSlotStart = signal('');
+  newSlotEnd = signal('');
+
+  calendarEvents = signal<any[]>([]);
 
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
@@ -42,8 +45,7 @@ export class CalendarComponent {
     dayMaxEvents: true,
     select: this.handleDateSelect.bind(this),
     eventClick: this.handleEventClick.bind(this),
-    datesSet: this.handleDatesSet.bind(this),
-    events: []
+    datesSet: this.handleDatesSet.bind(this)
   };
 
   handleDatesSet(arg: any) {
@@ -60,7 +62,7 @@ export class CalendarComponent {
   constructor() {
     effect(() => {
       const slots = this.slotsStore.slots();
-      this.calendarOptions.events = slots.map(s => {
+      this.calendarEvents.set(slots.map(s => {
         const signups = s.signups || [];
         return {
           id: s.id.toString(),
@@ -69,15 +71,15 @@ export class CalendarComponent {
           end: s.endTime,
           backgroundColor: signups.some(su => su.user.id === this.userStore.user()?.id) ? '#10b981' : '#3b82f6'
         };
-      });
+      }));
     });
   }
 
   handleDateSelect(selectInfo: DateSelectArg) {
-    this.newSlotStart = selectInfo.startStr;
-    this.newSlotEnd = selectInfo.endStr;
-    this.newSlotTitle = '';
-    this.showCreateModal = true;
+    this.newSlotStart.set(selectInfo.startStr);
+    this.newSlotEnd.set(selectInfo.endStr);
+    this.newSlotTitle.set('');
+    this.showCreateModal.set(true);
     const calendarApi = selectInfo.view.calendar;
     calendarApi.unselect();
   }
@@ -89,19 +91,21 @@ export class CalendarComponent {
   createSlot() {
     const group = this.groupStore.activeGroup();
     const user = this.userStore.user();
-    if (group && user && this.newSlotTitle) {
+    const title = this.newSlotTitle();
+    
+    if (group && user && title) {
       this.slotsStore.addSlot({
         devGroupId: group.id,
         ownerId: user.id,
-        startTime: this.newSlotStart,
-        endTime: this.newSlotEnd,
-        title: this.newSlotTitle
+        startTime: this.newSlotStart(),
+        endTime: this.newSlotEnd(),
+        title: title
       });
-      this.showCreateModal = false;
+      this.showCreateModal.set(false);
     }
   }
 
-  // Need to load slots when view changes. 
+  // Need to load slots when view changes.
   // For simplicity, I'll load on init for a fixed range or just rely on store logic?
   // Store `loadSlots` needs range.
   // I should hook into `datesSet` callback of FullCalendar.

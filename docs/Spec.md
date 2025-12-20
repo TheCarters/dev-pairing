@@ -21,8 +21,8 @@ This application will be used to allow a team of developers to coordinate togeth
 ## Tech Specs
 
 - Backend
-  - A .NET 10 API using Minimal APIs with Aspire
-  - SQLite in Aspire for the database
+  - A .NET 10 API using Minimal APIs
+  - SQLite for the database
   - [Ntfy.sh](https://ntfy.sh/) connection for push notifications
 - Frontend
   - An Angular 21 application

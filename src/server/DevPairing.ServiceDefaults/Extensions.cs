@@ -26,6 +26,9 @@ public static class Extensions
             http.AddServiceDiscovery();
         });
 
+        builder.Services.AddHealthChecks()
+            .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
+
         return builder;
     }
 

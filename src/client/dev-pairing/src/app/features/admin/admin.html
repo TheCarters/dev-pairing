@@ -1,0 +1,21 @@
+<div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+  <h1 class="text-2xl font-bold mb-4">Admin Notification Test</h1>
+  
+  <div class="mb-4">
+    <label class="block text-sm font-medium mb-1">Target Topic</label>
+    <input 
+      type="text" 
+      [(ngModel)]="topic" 
+      placeholder="e.g. slot-uuid-topic"
+      class="w-full p-2 border rounded"
+    >
+    <p class="text-xs text-gray-500 mt-1">Check the database or network logs for a slot's 'ntfyTopic'.</p>
+  </div>
+
+  <button 
+    (click)="sendNotification()" 
+    class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+  >
+    Send "Testing"
+  </button>
+</div>
