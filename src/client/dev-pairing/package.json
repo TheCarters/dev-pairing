@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "build:production": "npm run build && xcopy dist\\dev-pairing\\browser ..\\..\\server\\DevPairing.Api\\wwwroot /E /I /Y",
+    "build:production": "npm run build && cp -r dist/dev-pairing/browser ../../server/DevPairing.Api/wwwroot",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -22,6 +22,12 @@
     ]
   },
   "private": true,
+  "overrides": {
+    "@fullcalendar/angular": {
+      "@angular/common": "$@angular/common",
+      "@angular/core": "$@angular/core"
+    }
+  },
   "packageManager": "npm@11.3.0",
   "dependencies": {
     "@angular/common": "^21.0.0",

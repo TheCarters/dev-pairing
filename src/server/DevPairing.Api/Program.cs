@@ -1,7 +1,5 @@
 using DevPairing.Api.Data;
 using DevPairing.Api.Endpoints;
-using Microsoft.EntityFrameworkCore;
-
 using DevPairing.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,8 +12,7 @@ builder.Services.AddHttpClient<INtfyService, NtfyService>();
 builder.Services.AddEndpointsApiExplorer();
 // builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=devpairing.db"));
+builder.AddNpgsqlDbContext<AppDbContext>("devpairingdb");
 
 builder.Services.AddCors(options =>
 {
