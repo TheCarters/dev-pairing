@@ -1,6 +1,7 @@
 using DevPairing.Api.Data;
 using DevPairing.Api.Endpoints;
 using DevPairing.Api.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,12 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+
+using (var serviceScope = app.Services.CreateScope())
+{
+    var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
