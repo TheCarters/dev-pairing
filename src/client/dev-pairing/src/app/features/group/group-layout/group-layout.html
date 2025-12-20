@@ -1,0 +1,27 @@
+@if (groupStore.isLoading()) {
+  <div class="flex items-center justify-center h-screen">
+    <p>Loading group...</p>
+  </div>
+} @else if (groupStore.activeGroup()) {
+  @if (!userStore.isAuthenticated()) {
+    <app-user-login [joinGroupId]="groupStore.activeGroup()?.identifier"></app-user-login>
+  } @else {
+    <div class="min-h-screen bg-gray-100 flex flex-col">
+      <header class="bg-white shadow p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">{{ groupStore.activeGroup()?.name }}</h1>
+        <div class="flex items-center gap-4">
+           <span>{{ userStore.user()?.firstName }}</span>
+           <a routerLink="/preferences" class="text-blue-600 hover:underline">Preferences</a>
+           <button (click)="userStore.logout()" class="text-red-600 hover:underline">Logout</button>
+        </div>
+      </header>
+      <main class="flex-1 p-4 overflow-auto">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  }
+} @else {
+  <div class="flex items-center justify-center h-screen">
+    <p>Group not found.</p>
+  </div>
+}

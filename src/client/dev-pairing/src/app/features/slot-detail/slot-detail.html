@@ -1,0 +1,45 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg relative">
+    <button (click)="close()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">✕</button>
+    
+    @if (isLoading()) {
+      <p>Loading...</p>
+    } @else if (slot(); as s) {
+      <h2 class="text-2xl font-bold mb-2">{{ s.title }}</h2>
+      <p class="text-gray-600 mb-4">{{ s.startTime | date:'short' }} - {{ s.endTime | date:'shortTime' }}</p>
+      
+      <p class="mb-4">{{ s.description || 'No description provided.' }}</p>
+      
+      <div class="mb-6">
+        <h3 class="font-semibold mb-2">Participants</h3>
+        <div class="flex flex-wrap gap-2">
+          <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+            {{ s.owner.firstName }} (Owner)
+          </div>
+          @for (signup of s.signups || []; track signup.id) {
+            <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+              {{ signup.user.firstName }}
+            </div>
+          }
+          @if (!s.signups || s.signups.length === 0) {
+            <span class="text-gray-500 italic">No one else yet.</span>
+          }
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 border-t pt-4">
+        @if (isOwner()) {
+          <button (click)="deleteSlot()" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded">Delete</button>
+        }
+        
+        @if (isSignedUp()) {
+          <button (click)="leave()" class="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50">Leave</button>
+        } @else {
+          <button (click)="join()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Join</button>
+        }
+      </div>
+    } @else {
+      <p>Slot not found.</p>
+    }
+  </div>
+</div>

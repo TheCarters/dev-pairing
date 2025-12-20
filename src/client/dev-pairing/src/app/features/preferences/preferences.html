@@ -1,0 +1,26 @@
+<div class="container mx-auto p-8 max-w-lg">
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-bold">Preferences</h1>
+    <a routerLink="/" class="text-blue-600 hover:underline">Back to Home</a>
+  </div>
+
+  @if (userStore.isAuthenticated()) {
+    <div class="bg-white p-6 rounded shadow space-y-6">
+      <div class="flex items-center justify-between">
+        <label class="font-medium">Notify when someone joins my slot</label>
+        <input type="checkbox" [(ngModel)]="notifyOnSlotJoin" class="w-5 h-5">
+      </div>
+      
+      <div class="flex items-center justify-between">
+        <label class="font-medium">Notify before session starts</label>
+        <input type="checkbox" [(ngModel)]="notifyBeforeSessionStart" class="w-5 h-5">
+      </div>
+
+      <button (click)="save()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+        Save Preferences
+      </button>
+    </div>
+  } @else {
+    <p>Please log in to manage preferences.</p>
+  }
+</div>

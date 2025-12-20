@@ -1,0 +1,22 @@
+<div class="h-full bg-white p-4 rounded shadow">
+  <full-calendar [options]="calendarOptions"></full-calendar>
+</div>
+
+@if (showCreateModal) {
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-lg shadow-xl w-96">
+    <h3 class="text-lg font-bold mb-4">Create Slot</h3>
+    <input 
+      type="text" 
+      [(ngModel)]="newSlotTitle" 
+      placeholder="Title (e.g. Pair on Feature X)"
+      class="w-full p-2 border rounded mb-4"
+      autofocus
+    >
+    <div class="flex justify-end gap-2">
+      <button (click)="showCreateModal = false" class="px-4 py-2 text-gray-600">Cancel</button>
+      <button (click)="createSlot()" class="px-4 py-2 bg-blue-600 text-white rounded">Create</button>
+    </div>
+  </div>
+</div>
+}
