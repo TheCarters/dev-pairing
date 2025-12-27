@@ -12,8 +12,8 @@ public class PairingSlot
     public int OwnerId { get; set; }
     public User Owner { get; set; } = null!;
     
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
+    public DateTimeOffset StartTime { get; set; }
+    public DateTimeOffset EndTime { get; set; }
     
     [Required]
     public string Title { get; set; } = string.Empty;

@@ -17,6 +17,6 @@ public record PairingSignupWithSlotDto(
     int Id,
     PairingSlotSummaryDto Slot,
     UserDto User,
-    DateTime SignedUpAt,
+    DateTimeOffset SignedUpAt,
     string Status
 );
