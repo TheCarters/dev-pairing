@@ -42,8 +42,8 @@ public static class SlotEndpoints
             {
                 DevGroupId = input.DevGroupId,
                 OwnerId = input.OwnerId,
-                StartTime = input.StartTime,
-                EndTime = input.EndTime,
+                StartTime = input.StartTime.ToUniversalTime(),
+                EndTime = input.EndTime.ToUniversalTime(),
                 Title = input.Title,
                 Description = input.Description,
                 NtfyTopic = Guid.NewGuid().ToString() // Generate a topic
@@ -65,8 +65,8 @@ public static class SlotEndpoints
             var slot = await db.PairingSlots.FindAsync(id);
             if (slot == null) return Results.NotFound();
 
-            slot.StartTime = input.StartTime;
-            slot.EndTime = input.EndTime;
+            slot.StartTime = input.StartTime.ToUniversalTime();
+            slot.EndTime = input.EndTime.ToUniversalTime();
             slot.Title = input.Title;
             slot.Description = input.Description;
 
