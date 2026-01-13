@@ -20,16 +20,8 @@ export class App implements OnInit {
       const user = this.userStore.user();
       if (user) {
         this.signupsStore.loadSignups(user.id);
+        this.notificationService.init(user.id);
       }
-    });
-
-    effect(() => {
-      const signups = this.signupsStore.signups();
-      signups.forEach(s => {
-        if (s.slot && s.slot.ntfyTopic) {
-          this.notificationService.subscribeToTopic(s.slot.ntfyTopic);
-        }
-      });
     });
   }
 

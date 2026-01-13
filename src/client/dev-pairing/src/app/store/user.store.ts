@@ -27,10 +27,23 @@ export const UserStore = signalStore(
       const stored = localStorage.getItem('dev_pairing_user');
       if (stored) {
         const user = JSON.parse(stored) as User;
+        // Optimistically set user
         patchState(store, { user, isAuthenticated: true });
-        // Refresh memberships
-        userService.getUserGroups(user.id).subscribe(groups => {
-           patchState(store, { memberships: groups });
+
+        // Verify user exists in backend (handles stale local storage)
+        userService.getUser(user.id).subscribe({
+          next: () => {
+            // User exists, load memberships
+            userService.getUserGroups(user.id).subscribe(groups => {
+              patchState(store, { memberships: groups });
+            });
+          },
+          error: () => {
+            // User does not exist (e.g. DB reset), logout
+            console.warn('User ID not found in backend, clearing session.');
+            localStorage.removeItem('dev_pairing_user');
+            patchState(store, initialState);
+          }
         });
       }
     },
@@ -44,7 +57,7 @@ export const UserStore = signalStore(
               patchState(store, { user, isAuthenticated: true, isLoading: false });
               // Load memberships
               userService.getUserGroups(user.id).subscribe(groups => {
-                 patchState(store, { memberships: groups });
+                patchState(store, { memberships: groups });
               });
             })
           )
@@ -52,8 +65,8 @@ export const UserStore = signalStore(
       )
     ),
     logout: () => {
-        localStorage.removeItem('dev_pairing_user');
-        patchState(store, initialState);
+      localStorage.removeItem('dev_pairing_user');
+      patchState(store, initialState);
     }
   }))
 );

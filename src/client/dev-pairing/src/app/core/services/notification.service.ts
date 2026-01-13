@@ -4,10 +4,45 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class NotificationService {
-  private eventSources: Map<string, EventSource> = new Map();
+  private eventSource: EventSource | null = null;
+  private currentUserId: number | null = null;
 
-  constructor() {
-    this.requestPermission();
+  init(userId: number) {
+    if (this.currentUserId === userId) return;
+    this.currentUserId = userId;
+
+    if (this.eventSource) {
+      this.eventSource.close();
+    }
+
+    if (!('Notification' in window)) {
+      console.log('This browser does not support desktop notification');
+      return;
+    }
+
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    const topic = `dev-pairing-user-${userId}`;
+    const url = `https://ntfy.sh/${topic}/sse`;
+    
+    this.eventSource = new EventSource(url);
+    
+    this.eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.event === 'message') {
+           this.showNotification(data.title || 'Dev Pairing', data.message);
+        }
+      } catch (e) {
+        console.error('Error parsing notification data', e);
+      }
+    };
+
+    this.eventSource.onerror = (err) => {
+      console.error('EventSource failed:', err);
+    };
   }
 
   requestPermission() {
@@ -16,35 +51,13 @@ export class NotificationService {
     }
   }
 
-  subscribeToTopic(topic: string) {
-    if (this.eventSources.has(topic)) return;
-
-    const url = `https://ntfy.sh/${topic}/sse`;
-    const eventSource = new EventSource(url);
-
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      this.showNotification(data.title || 'Dev Pairing', data.message);
-    };
-
-    eventSource.onerror = (err) => {
-      console.error('Ntfy SSE error:', err);
-      // Optional: reconnect logic or just let EventSource retry
-    };
-
-    this.eventSources.set(topic, eventSource);
-  }
-
-  unsubscribeFromTopic(topic: string) {
-    const es = this.eventSources.get(topic);
-    if (es) {
-      es.close();
-      this.eventSources.delete(topic);
-    }
+  get permissionState(): NotificationPermission {
+      if (!('Notification' in window)) return 'denied';
+      return Notification.permission;
   }
 
   private showNotification(title: string, body: string) {
-    if ('Notification' in window && Notification.permission === 'granted') {
+    if (Notification.permission === 'granted') {
       new Notification(title, { body });
     }
   }

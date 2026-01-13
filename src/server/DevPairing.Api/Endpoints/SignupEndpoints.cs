@@ -32,26 +32,25 @@ public static class SignupEndpoints
 
             // Load relations
             await db.Entry(signup).Reference(s => s.User).LoadAsync();
-            await db.Entry(signup).Reference(s => s.Slot).LoadAsync();
+            await db.Entry(signup).Reference(s => s.Slot).Query()
+                .Include(s => s.Owner)
+                .ThenInclude(o => o.Preferences)
+                .LoadAsync();
             
-            // Send Notification
-            // Load Slot Owner to check preferences (optional optimization to not send if no one listening? 
-            // But if topic is public/shared, we might just send to topic. 
-            // Plan says: "When user signs up for slot -> notify slot owner (if preference enabled)"
-            // So we should check Owner's preference.
-            // Owner should be listening to Slot Topic? Or does Owner get a direct notification?
-            // "User subscribes to slot's ntfy topic"
-            // If the Owner is subscribed to the Slot Topic, then sending to Slot Topic works.
-            // But we only want to send if Owner wants it?
-            // Actually, if we send to Slot Topic, ANYONE subscribed gets it.
-            // If the requirement is "notify slot owner", maybe we should check if Owner wants it, 
-            // but if we use Slot Topic, we can't control *who* receives it, only if we send it.
-            // Assuming we send to Slot Topic.
+            // Send Notification if Owner wants it
+            var owner = signup.Slot.Owner;
+            // Preferences might be null if never set/accessed, default logic:
+            // If we assume default is TRUE, we can check if Preferences is null OR Preferences.NotifyOnSlotJoin is true.
+            // However, UserPreferences model has default = true. 
+            // Better to load or create if missing? Or just treat null as true?
+            // Let's treat null as true or default.
             
-            if (!string.IsNullOrEmpty(signup.Slot.NtfyTopic)) 
+            var shouldNotify = owner.Preferences?.NotifyOnSlotJoin ?? true;
+
+            if (shouldNotify) 
             {
                 await ntfyService.SendNotificationAsync(
-                    signup.Slot.NtfyTopic, 
+                    $"dev-pairing-user-{owner.Id}", 
                     $"New Signup: {signup.User.FirstName}", 
                     $"{signup.User.FirstName} joined {signup.Slot.Title}"
                 );

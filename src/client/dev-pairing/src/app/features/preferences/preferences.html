@@ -19,6 +19,21 @@
       <button (click)="save()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
         Save Preferences
       </button>
+
+      @if (permissionState !== 'granted') {
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
+            <div class="flex">
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                        Browser notifications are currently {{ permissionState }}.
+                        <button (click)="requestPermission()" class="underline font-bold">
+                            Enable Notifications
+                        </button>
+                    </p>
+                </div>
+            </div>
+        </div>
+      }
     </div>
   } @else {
     <p>Please log in to manage preferences.</p>

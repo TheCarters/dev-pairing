@@ -4,6 +4,7 @@ import { UserStore } from '../../store/user.store';
 import { PreferencesStore } from '../../store/preferences.store';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-preferences',
@@ -15,38 +16,51 @@ import { RouterModule } from '@angular/router';
 export class PreferencesComponent {
   userStore = inject(UserStore);
   preferencesStore = inject(PreferencesStore);
+  notificationService = inject(NotificationService);
 
   notifyOnSlotJoin = true;
   notifyBeforeSessionStart = true;
 
+  get permissionState() {
+    return this.notificationService.permissionState;
+  }
+
+  requestPermission() {
+    this.notificationService.requestPermission();
+  }
+
   constructor() {
     effect(() => {
-        const user = this.userStore.user();
-        if (user) {
-            this.preferencesStore.loadPreferences(user.id);
-        }
+      const user = this.userStore.user();
+      if (user) {
+        this.preferencesStore.loadPreferences(user.id);
+      }
     });
 
     effect(() => {
-        const prefs = this.preferencesStore.preferences();
-        if (prefs) {
-            this.notifyOnSlotJoin = prefs.notifyOnSlotJoin;
-            this.notifyBeforeSessionStart = prefs.notifyBeforeSessionStart;
-        }
+      const prefs = this.preferencesStore.preferences();
+      if (prefs) {
+        this.notifyOnSlotJoin = prefs.notifyOnSlotJoin;
+        this.notifyBeforeSessionStart = prefs.notifyBeforeSessionStart;
+      }
     });
   }
 
   save() {
     const user = this.userStore.user();
     if (user) {
-        this.preferencesStore.updatePreferences({
-            userId: user.id,
-            data: {
-                notifyOnSlotJoin: this.notifyOnSlotJoin,
-                notifyBeforeSessionStart: this.notifyBeforeSessionStart
-            }
-        });
-        alert('Preferences saved');
+      if (this.notifyOnSlotJoin && this.permissionState !== 'granted') {
+        this.notificationService.requestPermission();
+      }
+
+      this.preferencesStore.updatePreferences({
+        userId: user.id,
+        data: {
+          notifyOnSlotJoin: this.notifyOnSlotJoin,
+          notifyBeforeSessionStart: this.notifyBeforeSessionStart
+        }
+      });
+      alert('Preferences saved');
     }
   }
 }
